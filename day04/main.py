@@ -6,7 +6,7 @@ import pyperclip
 def read_rows(**kwargs):
     with open('data.txt', newline='') as csv_file:
         # return list(csv.reader(csv_file, **kwargs))
-        return csv_file.read().splitlines()
+        return csv_file.read().rstrip()
 
 
 def clip(x):
@@ -15,12 +15,12 @@ def clip(x):
     pyperclip.copy(x)
 
 
-rows = read_rows()
-x = part1(rows)
+code = read_rows()
+x = part1(code)
 print(f"Part 1: {x}")
 
-rows = read_rows()
-x = part2(rows)
+code = read_rows()
+x = part2(code)
 print(f"Part 2: {x}")
 
 clip(x)
