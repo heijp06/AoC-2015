@@ -1,0 +1,71 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3dbd04ef0da6c2ea0b3de949c6377cc681b527c5eebdb4098eabd8cabea78a89
+
+name:           day03
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/heijp06/day03#readme>
+homepage:       https://github.com/heijp06/day03#readme
+bug-reports:    https://github.com/heijp06/day03/issues
+author:         Peter van der Heijden
+maintainer:     peter@vanderheijden.name
+copyright:      Copyright 2020 Peter van der Heijden
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/heijp06/day03
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_day03
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , split
+    , utils
+  default-language: Haskell2010
+
+executable day03
+  main-is: Main.hs
+  other-modules:
+      Paths_day03
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Clipboard
+    , base >=4.7 && <5
+    , containers
+    , day03
+    , hspec
+    , split
+    , utils
+  default-language: Haskell2010
+
+test-suite day03-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_day03
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , day03
+    , hspec
+  default-language: Haskell2010
