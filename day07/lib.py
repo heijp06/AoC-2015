@@ -1,6 +1,6 @@
 from functools import cache
-from parsec import digit, letter, generate, many1, string
 import operator
+from parsec import digit, letter, generate, many1, space, string
 
 
 def part1(rows):
@@ -26,19 +26,24 @@ class Circuit:
     def value(self, op, a=None):
         if isinstance(op, int):
             return op
-        if a and op == "b":
+        if a is not None and op == "b":
             return a
         f, args = self._gates[op]
         return f(*(self.value(arg, a) for arg in args))
 
 
+binary_operators = {
+    "AND": operator.and_,
+    "OR": operator.or_,
+    "LSHIFT": operator.lshift,
+    "RSHIFT": operator.rshift,
+}
+
+
 @generate
 def gate():
     f, args = (
-        yield and_gate
-        ^ or_gate
-        ^ lshift_gate
-        ^ rshift_gate
+        yield binary_gate
         ^ not_gate
         ^ const_gate
     )
@@ -54,35 +59,13 @@ def const_gate():
 
 
 @generate
-def and_gate():
+def binary_gate():
     op1 = yield operand
-    yield string(" AND ")
+    yield space()
+    func = (yield string("AND") ^ string("OR") ^ string("RSHIFT") ^ string("LSHIFT"))
+    yield space()
     op2 = yield operand
-    return operator.and_, [op1, op2]
-
-
-@generate
-def or_gate():
-    op1 = yield operand
-    yield string(" OR ")
-    op2 = yield operand
-    return operator.or_, [op1, op2]
-
-
-@generate
-def lshift_gate():
-    op1 = yield operand
-    yield string(" LSHIFT ")
-    op2 = yield operand
-    return operator.lshift, [op1, op2]
-
-
-@generate
-def rshift_gate():
-    op1 = yield operand
-    yield string(" RSHIFT ")
-    op2 = yield operand
-    return operator.rshift, [op1, op2]
+    return binary_operators[func], [op1, op2]
 
 
 @generate
