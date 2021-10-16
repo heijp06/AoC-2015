@@ -1,5 +1,6 @@
 from functools import cache
 from parsec import digit, letter, generate, many1, string
+import operator
 
 
 def part1(rows):
@@ -49,7 +50,7 @@ def gate():
 @generate
 def const_gate():
     op = yield operand
-    return lambda a: a, [op]
+    return int, [op]
 
 
 @generate
@@ -57,7 +58,7 @@ def and_gate():
     op1 = yield operand
     yield string(" AND ")
     op2 = yield operand
-    return lambda a, b: a & b, [op1, op2]
+    return operator.and_, [op1, op2]
 
 
 @generate
@@ -65,7 +66,7 @@ def or_gate():
     op1 = yield operand
     yield string(" OR ")
     op2 = yield operand
-    return lambda a, b: a | b, [op1, op2]
+    return operator.or_, [op1, op2]
 
 
 @generate
@@ -73,7 +74,7 @@ def lshift_gate():
     op1 = yield operand
     yield string(" LSHIFT ")
     op2 = yield operand
-    return lambda a, b: a << b, [op1, op2]
+    return operator.lshift, [op1, op2]
 
 
 @generate
@@ -81,14 +82,14 @@ def rshift_gate():
     op1 = yield operand
     yield string(" RSHIFT ")
     op2 = yield operand
-    return lambda a, b: a >> b, [op1, op2]
+    return operator.rshift, [op1, op2]
 
 
 @generate
 def not_gate():
     yield string("NOT ")
     op = yield operand
-    return lambda a: 65535 - a, [op]
+    return operator.sub, [65535, op]
 
 
 @generate
