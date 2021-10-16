@@ -30,23 +30,25 @@ class Circuit:
 
 @generate
 def gate():
-    return (
-        yield const_gate
-        ^ and_gate
+    f, args = (
+        yield and_gate
         ^ or_gate
         ^ lshift_gate
         ^ rshift_gate
         ^ not_gate
         ^ odd_gate
         ^ copy_gate
+        ^ const_gate
     )
+    yield string(" -> ")
+    n = yield identifier
+    return n, (f, args)
 
 
 @generate
 def const_gate():
     value = yield number
-    n = yield name
-    return (n, (lambda: value, []))
+    return lambda: value, []
 
 
 @generate
@@ -54,8 +56,7 @@ def and_gate():
     op1 = yield identifier
     yield string(" AND ")
     op2 = yield identifier
-    n = yield name
-    return (n, (lambda a, b: a & b, [op1, op2]))
+    return lambda a, b: a & b, [op1, op2]
 
 
 @generate
@@ -63,8 +64,7 @@ def or_gate():
     op1 = yield identifier
     yield string(" OR ")
     op2 = yield identifier
-    n = yield name
-    return (n, (lambda a, b: a | b, [op1, op2]))
+    return lambda a, b: a | b, [op1, op2]
 
 
 @generate
@@ -72,8 +72,7 @@ def lshift_gate():
     op = yield identifier
     yield string(" LSHIFT ")
     value = yield number
-    n = yield name
-    return (n, (lambda a: a << value, [op]))
+    return lambda a: a << value, [op]
 
 
 @generate
@@ -81,31 +80,27 @@ def rshift_gate():
     op = yield identifier
     yield string(" RSHIFT ")
     value = yield number
-    n = yield name
-    return (n, (lambda a: a >> value, [op]))
+    return lambda a: a >> value, [op]
 
 
 @generate
 def not_gate():
     yield string("NOT ")
     op = yield identifier
-    n = yield name
-    return (n, (lambda a: 65535 - a, [op]))
+    return lambda a: 65535 - a, [op]
 
 
 @generate
 def odd_gate():
     yield string("1 AND ")
     op = yield identifier
-    n = yield name
-    return (n, (lambda a: 1 & a, [op]))
+    return lambda a: 1 & a, [op]
 
 
 @generate
 def copy_gate():
     op = yield identifier
-    n = yield name
-    return (n, (lambda a: a, [op]))
+    return lambda a: a, [op]
 
 
 @generate
@@ -118,9 +113,3 @@ def number():
 def identifier():
     letters = yield many1(letter())
     return "".join(letters)
-
-
-@generate
-def name():
-    yield string(" -> ")
-    return (yield identifier)
