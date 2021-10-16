@@ -3,6 +3,10 @@ from parsec import ParseError, digit, generate, many1, string
 
 
 def part1(rows):
+    global TURN_TO
+    global INVERT
+    TURN_TO = turn_to
+    INVERT = invert
     grid = [[0] * 1000 for _ in range(1000)]
     for row in rows:
         f = parse(row)
@@ -11,7 +15,15 @@ def part1(rows):
 
 
 def part2(rows):
-    pass
+    global TURN_TO
+    global INVERT
+    TURN_TO = inc
+    INVERT = inc2
+    grid = [[0] * 1000 for _ in range(1000)]
+    for row in rows:
+        f = parse(row)
+        f(grid)
+    return sum(sum(row) for row in grid)
 
 
 def parse(row):
@@ -29,19 +41,19 @@ def rule():
 @generate
 def turn_on():
     rect = yield string("turn on ") >> rectangle
-    return partial(set, rect, 1)
+    return partial(TURN_TO, 1, rect)
 
 
 @generate
 def turn_off():
     rect = yield string("turn off ") >> rectangle
-    return partial(set, rect, 0)
+    return partial(TURN_TO, 0, rect)
 
 
 @generate
 def toggle():
     rect = yield string("toggle ") >> rectangle
-    return partial(invert, rect)
+    return partial(INVERT, rect)
 
 
 @generate
@@ -66,7 +78,7 @@ def number():
     return int("".join(digits))
 
 
-def set(rect, value, grid):
+def turn_to(value, rect, grid):
     ((x0, y0), (x1, y1)) = rect
     for x in range(x0, x1+1):
         for y in range(y0, y1+1):
@@ -77,3 +89,16 @@ def invert(rect, grid):
     for x in range(x0, x1+1):
         for y in range(y0, y1+1):
             grid[x][y] = 1 - grid[x][y]
+
+def inc(value, rect, grid):
+    ((x0, y0), (x1, y1)) = rect
+    for x in range(x0, x1+1):
+        for y in range(y0, y1+1):
+            grid[x][y] += 2 * value - 1
+            grid[x][y] = max(0, grid[x][y])
+
+def inc2(rect, grid):
+    ((x0, y0), (x1, y1)) = rect
+    for x in range(x0, x1+1):
+        for y in range(y0, y1+1):
+            grid[x][y] += 2
