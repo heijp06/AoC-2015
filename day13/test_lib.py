@@ -4,11 +4,16 @@ from lib import Seating, part1, part2
 
 def test_lib():
     seating = Seating([example[0]])
-    assert len(seating.guests) == 1
-    assert "Alice" in seating.guests
+    assert len(seating.guests) == 0
+    assert seating.first_guest == "Alice"
     assert len(seating.happiness) == 1
     assert "Alice", "Bob" in seating.happiness
     assert seating.happiness["Alice", "Bob"] == 54
+
+def test_optimal():
+    seating = Seating(example)
+    assert seating.optimal() == 330
+    
 
 
 example = [
