@@ -1,5 +1,5 @@
 import re
-from itertools import permutations
+from itertools import pairwise, permutations
 
 
 def part1(rows):
@@ -43,7 +43,7 @@ class Seating:
             sum(
                 self.happiness[a, b] + self.happiness[b, a]
                 for a, b
-                in zip(arrangement, arrangement[1:])
+                in pairwise(arrangement)
             )
             for arrangement in self.arrangements()
         )
