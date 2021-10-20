@@ -1,38 +1,57 @@
 import re
 import sys
 from collections import namedtuple
-from parsec import digit, generate, letter, many, none_of, string
+from parsec import ParseError, digit, generate, letter, many, none_of, string
+import operator
+from functools import partial
 
 _MODULE = "module"
 
 
 def regel(typename, pattern, **kwargs):
-    regex, fields, funcs = _regel.parse_strict(pattern)
-    _set_module(kwargs)
+    try:
+        regex, fields, funcs = _regel.parse_strict(pattern)
+    except ParseError as err:
+        raise ValueError(
+            f"Error parsing pattern '{pattern}' at position {err.loc()}.")
+    caller = sys._getframe(1)
+    _set_module(caller, kwargs)
     cls = type(typename, (namedtuple(typename, fields, **kwargs),), {})
+    cls._caller = caller
     cls.__module__ = kwargs[_MODULE]
     cls.regex = re.compile(regex)
     cls.funcs = funcs
     cls.parse = parse
+    cls.pattern = pattern
     return cls
 
 
-def _set_module(kwargs):
+def eq(value):
+    return partial(operator.eq, value)
+
+
+def ne(value):
+    return partial(operator.ne, value)
+
+
+def _set_module(caller, kwargs):
     if _MODULE in kwargs and kwargs[_MODULE]:
         return
     try:
-        kwargs[_MODULE] = sys._getframe(
-            2).f_globals.get('__name__', '__main__')
+        kwargs[_MODULE] = caller.f_globals.get('__name__', '__main__')
     except (AttributeError, ValueError):
         pass
 
 
 @classmethod
-def parse(cls, value):
-    match = cls.regex.match(value)
+def parse(cls, text):
+    match = cls.regex.match(text)
+    if not match:
+        raise ValueError(f"Text '{text}' does not match pattern '{cls.pattern}'")
     strings = match.groups()
     values = [
-        eval(f"({func})('{string}')")
+        eval(f"({func})('{string}')",
+             cls._caller.f_globals, cls._caller.f_locals)
         for func, string
         in zip(cls.funcs, strings)
     ]
@@ -51,8 +70,20 @@ def _regel():
 
 @generate
 def _text():
-    chars = yield many(none_of("{}"))
+    chars = yield many(_open_brace ^ _close_brace ^ none_of("{}"))
     return "".join(chars)
+
+
+@generate
+def _open_brace():
+    yield string("{{")
+    return "{"
+
+
+@generate
+def _close_brace():
+    yield string("}}")
+    return "}"
 
 
 @generate
