@@ -53,10 +53,18 @@ def test_dictionary():
 
 
 def test_braces_in_text():
-    obj = regel("Obj", "{{not_a_field:int}} {a_field:int}").parse("{not_a_field:int} 42")
+    obj = regel("Obj", "{{not_a_field:int}} {a_field:int}").parse(
+        "{not_a_field:int} 42")
     assert obj.a_field == 42
 
 
 def test_module_name():
     Obj = regel("Obj", "{field} (abc)")
     assert Obj.__module__ == __name__
+
+
+def test_constructor():
+    Obj = regel("Obj", "{field1:int} {field2:int}")
+    obj = Obj("42 43")
+    assert obj.field1 == 42
+    assert obj.field2 == 43
