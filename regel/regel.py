@@ -10,9 +10,20 @@ _MODULE = "module"
 
 def regel(typename, pattern, **kwargs):
     def _init(self, text):
-        values = bla(self, text)
-        for field, value in zip(fields, values):
+        match = self._regex.match(text)
+        if not match:
+            raise ValueError(
+                f"Text '{text}' does not match pattern '{self._pattern}'")
+        strings = match.groups()
+        values = [
+            eval(f"({func})('{string}')",
+                 self._caller.f_globals, self._caller.f_locals)
+            for func, string
+            in zip(self._funcs, strings)
+        ]
+        for field, value in zip(self._fields, values):
             setattr(self, field, value)
+
     try:
         regex, fields, funcs = _regel.parse_strict(pattern)
     except ParseError as err:
@@ -24,11 +35,11 @@ def regel(typename, pattern, **kwargs):
     cls._caller = caller
     cls.__module__ = kwargs[_MODULE]
     cls.__init__ = _init
-    cls.regex = re.compile(regex)
-    cls.fields = fields
-    cls.funcs = funcs
-    cls.parse = parse
-    cls.pattern = pattern
+    cls._regex = re.compile(regex)
+    cls._fields = fields
+    cls._funcs = funcs
+    cls._parse = _parse
+    cls._pattern = pattern
     return cls
 
 
@@ -48,22 +59,9 @@ def _set_module(caller, kwargs):
     except (AttributeError, ValueError):
         pass
 
-def bla(cls, text):
-    match = cls.regex.match(text)
-    if not match:
-        raise ValueError(f"Text '{text}' does not match pattern '{cls.pattern}'")
-    strings = match.groups()
-    return [
-        eval(f"({func})('{string}')",
-             cls._caller.f_globals, cls._caller.f_locals)
-        for func, string
-        in zip(cls.funcs, strings)
-    ]
 
 @classmethod
-def parse(cls, text):
-    # values = bla(cls, text)
-    # return cls(*values)
+def _parse(cls, text):
     return cls(text)
 
 
@@ -113,6 +111,6 @@ def _field():
 
 @generate
 def _identifier():
-    head = yield (string("_") | letter())
+    head = yield letter()
     tail = yield many(string("_") | letter() | digit())
     return head + "".join(tail)
