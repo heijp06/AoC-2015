@@ -9,6 +9,10 @@ _MODULE = "module"
 
 
 def regel(typename, pattern, **kwargs):
+    def _init(self, text):
+        values = bla(self, text)
+        for field, value in zip(fields, values):
+            setattr(self, field, value)
     try:
         regex, fields, funcs = _regel.parse_strict(pattern)
     except ParseError as err:
@@ -16,10 +20,12 @@ def regel(typename, pattern, **kwargs):
             f"Error parsing pattern '{pattern}' at position {err.loc()}.")
     caller = sys._getframe(1)
     _set_module(caller, kwargs)
-    cls = type(typename, (namedtuple(typename, fields, **kwargs),), {})
+    cls = type(typename, (), {})
     cls._caller = caller
     cls.__module__ = kwargs[_MODULE]
+    cls.__init__ = _init
     cls.regex = re.compile(regex)
+    cls.fields = fields
     cls.funcs = funcs
     cls.parse = parse
     cls.pattern = pattern
@@ -42,20 +48,23 @@ def _set_module(caller, kwargs):
     except (AttributeError, ValueError):
         pass
 
-
-@classmethod
-def parse(cls, text):
+def bla(cls, text):
     match = cls.regex.match(text)
     if not match:
         raise ValueError(f"Text '{text}' does not match pattern '{cls.pattern}'")
     strings = match.groups()
-    values = [
+    return [
         eval(f"({func})('{string}')",
              cls._caller.f_globals, cls._caller.f_locals)
         for func, string
         in zip(cls.funcs, strings)
     ]
-    return cls(*values)
+
+@classmethod
+def parse(cls, text):
+    # values = bla(cls, text)
+    # return cls(*values)
+    return cls(text)
 
 
 @generate
