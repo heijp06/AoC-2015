@@ -8,7 +8,7 @@ from functools import partial
 _MODULE = "module"
 
 
-def regel(typename, pattern, **kwargs):
+def regel(typename, pattern):
     def _init(self, text):
         match = self._regex.match(text)
         if not match:
@@ -17,7 +17,7 @@ def regel(typename, pattern, **kwargs):
         strings = match.groups()
         values = [
             eval(f"({func})('{string}')",
-                 self._caller.f_globals, self._caller.f_locals)
+                 self._f_globals, self._f_locals)
             for func, string
             in zip(self._funcs, strings)
         ]
@@ -29,17 +29,28 @@ def regel(typename, pattern, **kwargs):
     except ParseError as err:
         raise ValueError(
             f"Error parsing pattern '{pattern}' at position {err.loc()}.")
-    caller = sys._getframe(1)
-    _set_module(caller, kwargs)
+
+    try:
+        caller = sys._getframe(1)
+        f_globals = caller.f_globals
+        f_locals = caller.f_locals
+        module = f_globals.get('__name__', '__main__')
+    except (AttributeError, ValueError):
+        f_globals = {}
+        f_locals = {}
+        module = __name__
+
     cls = type(typename, (), {})
     cls._caller = caller
-    cls.__module__ = kwargs[_MODULE]
+    cls.__module__ = module
     cls.__init__ = _init
     cls._regex = re.compile(regex)
     cls._fields = fields
     cls._funcs = funcs
     cls._parse = _parse
     cls._pattern = pattern
+    cls._f_globals = f_globals
+    cls._f_locals = f_locals
     return cls
 
 
@@ -49,15 +60,6 @@ def eq(value):
 
 def ne(value):
     return partial(operator.ne, value)
-
-
-def _set_module(caller, kwargs):
-    if _MODULE in kwargs and kwargs[_MODULE]:
-        return
-    try:
-        kwargs[_MODULE] = caller.f_globals.get('__name__', '__main__')
-    except (AttributeError, ValueError):
-        pass
 
 
 @classmethod

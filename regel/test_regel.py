@@ -70,6 +70,7 @@ def test_constructor():
     assert obj.field1 == 42
     assert obj.field2 == 43
 
+
 def test_field_cannot_start_with_underscore():
     with pytest.raises(ValueError):
         regel("Obj", "{_field}")
