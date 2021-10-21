@@ -39,19 +39,20 @@ def regel(typename, pattern):
         f_globals = {}
         f_locals = {}
         module = __name__
+    
+    namespace = {
+        "__module__": module,
+        "__init__": _init,
+        "_regex": re.compile(regex),
+        "_fields": fields,
+        "_funcs": funcs,
+        "_parse": _parse,
+        "_pattern": pattern,
+        "_f_globals": f_globals,
+        "_f_locals": f_locals,
+    }
 
-    cls = type(typename, (), {})
-    cls._caller = caller
-    cls.__module__ = module
-    cls.__init__ = _init
-    cls._regex = re.compile(regex)
-    cls._fields = fields
-    cls._funcs = funcs
-    cls._parse = _parse
-    cls._pattern = pattern
-    cls._f_globals = f_globals
-    cls._f_locals = f_locals
-    return cls
+    return type(typename, (), namespace)
 
 
 def eq(value):
