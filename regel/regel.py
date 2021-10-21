@@ -41,6 +41,10 @@ def regel(typename, pattern):
         module = __name__
     
     namespace = {
+<<<<<<< HEAD
+=======
+        "_caller": caller,
+>>>>>>> 7df3efa3cf9966a18528f3c44d48d77d214f6e04
         "__module__": module,
         "__init__": _init,
         "_regex": re.compile(regex),
