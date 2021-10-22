@@ -1,5 +1,8 @@
 import re
 from itertools import pairwise, permutations
+import sys
+sys.path.append("../regel")
+from regel import regel, eq
 
 
 def part1(rows):
@@ -14,21 +17,22 @@ def part2(rows):
 
 class Seating:
     def __init__(self, guest_list, me=None):
+        Parser = regel(
+            "Parser",
+            "{guest1} would {gain:eq('gain')} {happiness:int} happiness units by sitting next to {guest2}."
+        )
         self.guests = set()
         self.happiness = {}
         self.first_guest = me
         for row in guest_list:
-            match = re.match(
-                r"(.*) would (.*) (.*) happiness units by sitting next to (.*)\.",
-                row)
-            guest1, sign, units, guest2 = match.groups()
-            if self.first_guest != guest1:
+            result = Parser._parse(row)
+            if self.first_guest != result.guest1:
                 if not self.first_guest:
-                    self.first_guest = guest1
+                    self.first_guest = result.guest1
                 else:
-                    self.guests.add(guest1)
-            self.happiness[guest1, guest2] = int(
-                units) if sign == "gain" else -int(units)
+                    self.guests.add(result.guest1)
+            self.happiness[result.guest1,
+                           result.guest2] = result.happiness if result.gain else -result.happiness
         self.add_me(me)
 
     def add_me(self, me):
