@@ -110,6 +110,11 @@ def test_list_to_int():
     assert obj.fields == [1, 2, 3]
 
 
+def test_list_to_int_to_bool():
+    obj = regel("Obj", "{fields:split():int:eq(2)}")._parse("1 2 3")
+    assert obj.fields == [False, True, False]
+
+
 def test_colon_in_text():
     obj = regel("Obj", "The value is: {field}")._parse("The value is: 42")
     assert obj.field == "42"
