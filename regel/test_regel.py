@@ -74,3 +74,16 @@ def test_constructor():
 def test_field_cannot_start_with_underscore():
     with pytest.raises(ValueError):
         regel("Obj", "{_field}")
+
+
+def test_do_not_use_str_for_no_conversion():
+    # Initially str() was used as a no-op string conversion.
+    # Which has the below potential problem.
+    str = int
+    obj = regel("Obj", "{field1}")._parse("42")
+    assert obj.field1 == "42"
+
+
+def test_duplicate_field():
+    with pytest.raises(ValueError):
+        regel("Obj", "{field} {field}")

@@ -17,7 +17,7 @@ def regel(typename, pattern):
         strings = match.groups()
         values = [
             eval(f"({func})('{string}')",
-                 self._f_globals, self._f_locals)
+                 self._f_globals, self._f_locals) if func else string
             for func, string
             in zip(self._funcs, strings)
         ]
@@ -30,6 +30,12 @@ def regel(typename, pattern):
         raise ValueError(
             f"Error parsing pattern '{pattern}' at position {err.loc()}.")
 
+    seen = set()
+    for field in fields:
+        if field in seen:
+            raise ValueError(f"Duplicate field '{field}'.")
+        seen.add(field)
+
     try:
         caller = sys._getframe(1)
         f_globals = caller.f_globals
@@ -39,7 +45,7 @@ def regel(typename, pattern):
         f_globals = {}
         f_locals = {}
         module = __name__
-    
+
     namespace = {
         "__module__": module,
         "__init__": _init,
@@ -109,7 +115,7 @@ def _field_with_func():
 @generate
 def _field():
     identifier = yield string("{") >> _identifier << string("}")
-    return identifier, "str"
+    return identifier, None
 
 
 @generate
