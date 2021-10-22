@@ -1,10 +1,8 @@
 import re
 import sys
-from collections import namedtuple
-from typing import Iterable
 from parsec import ParseError, digit, generate, letter, many, none_of, string
 import operator
-from functools import partial
+from functools import partial, reduce
 
 _MODULE = "module"
 
@@ -25,15 +23,12 @@ def regel(typename, pattern):
             setattr(self, field, value)
 
     def _apply_many(self, funcs, string):
-        value = string
-        for func in funcs:
-            value = self._apply(func, value)
-        return value
+        return reduce(self._apply, funcs, string)
 
-    def _apply(self, func, value):
-        if isinstance(value, str) or not isinstance(value, Iterable):
-            return eval(f"({func})('{value}')", self._f_globals, self._f_locals)
-        return eval(f"[({func})(elem) for elem in {value}]", self._f_globals, self._f_locals)
+    def _apply(self, value, func):
+        t, f = func
+        code = f"({f})({repr(value)})" if t == ":" else f"[({f})(elem) for elem in {repr(value)}]"
+        return eval(code, self._f_globals, self._f_locals)
 
     try:
         regex, fields, funcs = _regel.parse_strict(pattern)
@@ -49,8 +44,8 @@ def regel(typename, pattern):
 
     try:
         caller = sys._getframe(1)
-        f_globals = caller.f_globals
-        f_locals = caller.f_locals
+        f_globals = dict(caller.f_globals)
+        f_locals = dict(caller.f_locals)
         module = f_globals.get('__name__', '__main__')
     except (AttributeError, ValueError):
         f_globals = {}
@@ -121,13 +116,13 @@ def _text():
 
 @generate
 def _open_brace():
-    yield string("{{")
+    yield string("\{")
     return "{"
 
 
 @generate
 def _close_brace():
-    yield string("}}")
+    yield string("\}")
     return "}"
 
 
@@ -139,7 +134,7 @@ def _func():
 
 @generate
 def _colon():
-    yield string("::")
+    yield string("\:")
     return ":"
 
 
@@ -147,7 +142,7 @@ def _colon():
 def _field_with_funcs():
     yield string("{")
     identifier = yield _identifier
-    funcs = yield many(string(":") >> _func)
+    funcs = yield many((string("::") ^ string(":")) + _func)
     yield string("}")
     return identifier, funcs
 

@@ -48,13 +48,13 @@ def test_local_function():
 
 
 def test_dictionary():
-    obj = regel("Obj", "{dict:lambda x:: {{x:: 5}}}")._parse("five")
+    obj = regel("Obj", "{dict:lambda x\: \{x\: 5\}}")._parse("five")
     assert "five" in obj.dict
     assert obj.dict["five"] == 5
 
 
 def test_braces_in_text():
-    obj = regel("Obj", "{{not_a_field:int}} {a_field:int}")._parse(
+    obj = regel("Obj", "\{not_a_field:int\} {a_field:int}")._parse(
         "{not_a_field:int} 42")
     assert obj.a_field == 42
 
@@ -105,14 +105,24 @@ def test_split_multiple_delimiters():
     assert obj.fields == ["one", "two", "three"]
 
 
-def test_list_to_int():
-    obj = regel("Obj", "{fields:split():int}")._parse("1 2 3")
+def test_list_to_ints():
+    obj = regel("Obj", "{fields:split()::int}")._parse("1 2 3")
     assert obj.fields == [1, 2, 3]
 
 
-def test_list_to_int_to_bool():
-    obj = regel("Obj", "{fields:split():int:eq(2)}")._parse("1 2 3")
+def test_list_to_ints_to_bools():
+    obj = regel("Obj", "{fields:split()::int::eq(2)}")._parse("1 2 3")
     assert obj.fields == [False, True, False]
+
+
+def test_list_to_ints_to_bools_to_len():
+    obj = regel("Obj", "{fields:split()::int::eq(2):len}")._parse("1 2 3")
+    assert obj.fields == 3
+
+
+def test_field_to_list():
+    obj = regel("Obj", "{fields::str}")._parse("abc")
+    assert obj.fields == ["a", "b", "c"]
 
 
 def test_colon_in_text():
