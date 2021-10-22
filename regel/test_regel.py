@@ -48,7 +48,7 @@ def test_local_function():
 
 
 def test_dictionary():
-    obj = regel("Obj", "{dict:lambda x: {{x: 5}}}")._parse("five")
+    obj = regel("Obj", "{dict:lambda x:: {{x:: 5}}}")._parse("five")
     assert "five" in obj.dict
     assert obj.dict["five"] == 5
 
@@ -103,6 +103,17 @@ def test_split_multiple_delimiters():
     obj = regel("Obj", "{fields:split(', ', ' and ')}.")._parse(
         "one, two and three.")
     assert obj.fields == ["one", "two", "three"]
+
+
+def test_list_to_int():
+    obj = regel("Obj", "{fields:split():int}")._parse("1 2 3")
+    assert obj.fields == [1, 2, 3]
+
+
+def test_colon_in_text():
+    obj = regel("Obj", "The value is: {field}")._parse("The value is: 42")
+    assert obj.field == "42"
+
 
 # 2020 day 4, passport, dictionary
 # 2020 day 7, shiny gold bag, list, object
