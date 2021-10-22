@@ -1,5 +1,5 @@
 import pytest
-from regel import eq, ne, regel
+from regel import eq, ne, regel, split
 
 
 def test_string_field():
@@ -87,3 +87,22 @@ def test_do_not_use_str_for_no_conversion():
 def test_duplicate_field():
     with pytest.raises(ValueError):
         regel("Obj", "{field} {field}")
+
+
+def test_split_default_separator():
+    obj = regel("Obj", "{fields:split()}.")._parse("one two three.")
+    assert obj.fields == ["one", "two", "three"]
+
+
+def test_split_no_match():
+    obj = regel("Obj", "{fields:split(',')}.")._parse("one two three.")
+    assert obj.fields == ["one two three"]
+
+
+def test_split_multiple_delimiters():
+    obj = regel("Obj", "{fields:split(', ', ' and ')}.")._parse(
+        "one, two and three.")
+    assert obj.fields == ["one", "two", "three"]
+
+# 2020 day 4, passport, dictionary
+# 2020 day 7, shiny gold bag, list, object
