@@ -110,7 +110,7 @@ def _regel():
 
 @generate
 def _text():
-    chars = yield many(_open_brace ^ _close_brace ^ none_of("{}"))
+    chars = yield many(_open_brace ^ _close_brace ^ _backslash ^ none_of("{}"))
     return "".join(chars)
 
 
@@ -127,8 +127,15 @@ def _close_brace():
 
 
 @generate
+def _backslash():
+    yield string("\\\\")
+    # A backslash still needs to be escaped in the regex.
+    return "\\\\"
+
+
+@generate
 def _func():
-    chars = yield many(_open_brace ^ _close_brace ^ _colon ^ none_of("{:}"))
+    chars = yield many(_open_brace ^ _close_brace ^ _backslash ^ _colon ^ none_of("{:}"))
     return "".join(chars)
 
 

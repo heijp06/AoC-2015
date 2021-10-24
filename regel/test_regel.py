@@ -130,5 +130,15 @@ def test_colon_in_text():
     assert obj.field == "42"
 
 
+def test_backslash_in_text():
+    obj = regel("Obj", r"The path is: {pathname}")._parse(r"The path is: c:\temp\readme.txt")
+    assert obj.pathname == r"c:\temp\readme.txt"
+
+
+def test_backslash_before_open_brace():
+    obj = regel("Obj", r"The path is: c:\\temp\\{filename}")._parse(r"The path is: c:\temp\readme.txt")
+    assert obj.filename == "readme.txt"
+
+
 # 2020 day 4, passport, dictionary
 # 2020 day 7, shiny gold bag, list, object
