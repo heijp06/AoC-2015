@@ -27,7 +27,7 @@ def test_group_in_pattern():
     assert obj.field == "value"
 
 
-def test_day13_seating():
+def test_2015_day13_seating():
     Seating = regel(
         "Seating",
         "{guest1} would {gain:eq('gain')} {happiness:int} happiness units by sitting next to {guest2}."
@@ -131,14 +131,52 @@ def test_colon_in_text():
 
 
 def test_backslash_in_text():
-    obj = regel("Obj", r"The path is: {pathname}")._parse(r"The path is: c:\temp\readme.txt")
+    obj = regel("Obj", r"The path is: {pathname}")._parse(
+        r"The path is: c:\temp\readme.txt")
     assert obj.pathname == r"c:\temp\readme.txt"
 
 
 def test_backslash_before_open_brace():
-    obj = regel("Obj", r"The path is: c:\\temp\\{filename}")._parse(r"The path is: c:\temp\readme.txt")
+    obj = regel("Obj", r"The path is: c:\\temp\\{filename}")._parse(
+        r"The path is: c:\temp\readme.txt")
     assert obj.filename == "readme.txt"
 
+
+def test_2020_day7_contains_other():
+    class Contents(regel('Contents', "{number:int} {c1} {c2} bag")):
+        def __init__(self, row):
+            super().__init__(row)
+            self.color = f"{self.c1} {self.c2}"
+
+    class Bag(regel('Bag', "{color} bags contain {contents:split(', ', 's, ')::Contents}.")):
+        pass
+
+    bag = Bag("light red bags contain 1 bright white bag, 2 muted yellow bags.")
+
+    assert bag.color == "light red"
+    assert len(bag.contents) == 2
+    assert bag.contents[0].number == 1
+    assert bag.contents[0].color == "bright white"
+    assert bag.contents[1].number == 2
+    assert bag.contents[1].color == "muted yellow"
+
+
+def test_2020_day7_contains_other():
+    def empty(_):
+        return list()
+
+    class Bag(regel('Bag', "{color} bags contain no {contents:empty}.")):
+        pass
+
+    bag = Bag("faded blue bags contain no other bags.")
+
+    assert bag.color == "faded blue"
+    assert len(bag.contents) == 0
+
+
+@pytest.mark.skip("TODO")
+def test_2020_day7_bags_with_and_without_contents():
+    pass
 
 # 2020 day 4, passport, dictionary
 # 2020 day 7, shiny gold bag, list, object
