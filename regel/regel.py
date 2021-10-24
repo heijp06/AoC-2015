@@ -17,7 +17,7 @@ def regel(typename, pattern):
         values = [
             self._apply_many(funcs, string)
             for funcs, string
-            in zip(self._funcs, strings)
+            in zip(self._funcLists, strings)
         ]
         for field, value in zip(self._fields, values):
             setattr(self, field, value)
@@ -25,13 +25,12 @@ def regel(typename, pattern):
     def _apply_many(self, funcs, string):
         return reduce(self._apply, funcs, string)
 
-    def _apply(self, value, func):
-        t, f = func
-        code = f"({f})({repr(value)})" if t == ":" else f"[({f})(elem) for elem in {repr(value)}]"
-        return eval(code, self._f_globals, self._f_locals)
+    def _apply(self, value, applFunc):
+        application, func = applFunc
+        return func(value) if application == ':' else [func(elem) for elem in value]
 
     try:
-        regex, fields, funcs = _regel.parse_strict(pattern)
+        regex, fields, funcLists = _regel.parse_strict(pattern)
     except ParseError as err:
         raise ValueError(
             f"Error parsing pattern '{pattern}' at position {err.loc()}.")
@@ -52,6 +51,15 @@ def regel(typename, pattern):
         f_locals = {}
         module = __name__
 
+    funcLists = [
+        [
+            (application, eval(func, f_globals, f_locals))
+            for (application, func)
+            in funcs
+        ]
+        for funcs in funcLists
+    ]
+
     namespace = {
         "__module__": module,
         "__init__": _init,
@@ -59,11 +67,9 @@ def regel(typename, pattern):
         "_apply": _apply,
         "_regex": re.compile(regex),
         "_fields": fields,
-        "_funcs": funcs,
+        "_funcLists": funcLists,
         "_parse": _parse,
         "_pattern": pattern,
-        "_f_globals": f_globals,
-        "_f_locals": f_locals,
     }
 
     return type(typename, (), namespace)
