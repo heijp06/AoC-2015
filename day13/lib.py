@@ -1,7 +1,7 @@
 import re
 from itertools import pairwise, permutations
 import sys
-sys.path.append("../regel")
+sys.path.append("../../regel")
 from regel import regel, eq
 
 
