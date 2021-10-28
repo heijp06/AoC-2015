@@ -99,6 +99,10 @@ def split(*args):
     return _split
 
 
+def const(value):
+    return lambda _: value
+
+
 @classmethod
 def _parse(cls, text):
     return cls(text)

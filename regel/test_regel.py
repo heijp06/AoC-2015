@@ -1,5 +1,5 @@
 import pytest
-from regel import eq, ne, regel, split
+from regel import const, eq, ne, regel, split
 
 
 def test_string_field():
@@ -162,10 +162,7 @@ def test_2020_day7_contains_other():
 
 
 def test_2020_day7_contains_other():
-    def empty(_):
-        return list()
-
-    class Bag(regel('Bag', "{color} bags contain no {contents:empty}.")):
+    class Bag(regel('Bag', "{color} bags contain no {contents:const([])}.")):
         pass
 
     bag = Bag("faded blue bags contain no other bags.")
@@ -180,3 +177,4 @@ def test_2020_day7_bags_with_and_without_contents():
 
 # 2020 day 4, passport, dictionary
 # 2020 day 7, shiny gold bag, list, object
+# 2020 day 14, bitmask program
