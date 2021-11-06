@@ -20,8 +20,12 @@ def test_choices():
     assert expected == actual
 
 
-def test_example():
+def test_part1_example():
     assert part1(example) == 62842880
+
+
+def test_part2_example():
+    assert part2(example) == 57600000
 
 
 example = [
