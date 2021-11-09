@@ -1,5 +1,6 @@
 import re
 from collections import defaultdict
+from group import Group
 
 
 def part1(rows):
@@ -11,7 +12,10 @@ def part1(rows):
 
 # Once created, Ar, C, Rn, Th and Y can never be destroyed.
 def part2(rows):
-    pass
+    medicine = rows[-1]
+    replacements = [(b, a) for a, b in get_replacements(rows)]
+    molecule = Group.parse_molecule(medicine)
+
 
 
 def get_replacements(rows):
