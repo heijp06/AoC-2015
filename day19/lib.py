@@ -17,7 +17,6 @@ def part2(rows):
     molecule = Group.parse_molecule(medicine)
 
 
-
 def get_replacements(rows):
     replacements = []
     for row in rows:

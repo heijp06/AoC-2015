@@ -1,15 +1,16 @@
 from __future__ import annotations
 from typing import Any, Iterable
 
+
 class Group:
     @staticmethod
-    def parse_molecule(molecule: str) -> list[Group]:
+    def parse_molecule(molecule: str) -> list[Any]:
         groups, _ = Group._do_parse(molecule, 0)
         return groups
-    
+
     @staticmethod
-    def _do_parse(molecule: str, pos: int) -> list[list[Group], int]:
-        groups = []
+    def _do_parse(molecule: str, pos: int) -> tuple[list[Any], int]:
+        groups: list[Any] = []
         while True:
             rn = molecule.find("Rn", pos)
             ar = molecule.find("Ar", pos)
@@ -26,12 +27,11 @@ class Group:
             nested_groups, pos = Group._do_parse(molecule, rn + 2)
             groups.append(Group(nested_groups))
 
-
-    def __init__(self, groups: Iterable[Any]) -> Group:
+    def __init__(self, groups: Iterable[Any]) -> None:
         self.groups = list(groups)
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Group) and self.groups == other.groups
-    
+
     def __repr__(self) -> str:
         return f"Group({', '.join(repr(group) for group in self.groups)})"
