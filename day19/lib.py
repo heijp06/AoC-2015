@@ -15,6 +15,8 @@ def part2(rows):
     medicine = rows[-1]
     replacements = [(b, a) for a, b in get_replacements(rows)]
     molecule = Group.parse_molecule(medicine)
+    molecule.reduce(replacements, {"e"})
+    return molecule
 
 
 def get_replacements(rows):
