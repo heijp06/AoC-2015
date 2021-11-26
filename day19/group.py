@@ -29,9 +29,11 @@ class Group:
 
     @staticmethod
     def _do_reduction(string: str, replacements: list[tuple[str, str]], terminals: set[str]) -> tuple[str, int]:
+        print(f"string  = {string}")
         strings = {string}
         reductions = 0
         while all(s not in terminals for s in strings):
+            print(len(strings))
             strings = {
                 replaced
                 for s in strings
@@ -39,15 +41,19 @@ class Group:
             }
             reductions += 1
         reduced = next(string for string in strings if string in terminals)
+        print(f"reduced = {reduced}")
         return reduced, reductions
 
     @staticmethod
     def _replace_all(molecule: str, replacements: list[tuple[str, str]]) -> set[str]:
+        max_pos = molecule.find("Ar")
+        if max_pos == -1:
+            max_pos = len(molecule)
         new_molecules = set()
         for pattern, replacement in replacements:
             start = 0
             pos = molecule.find(pattern, start)
-            while pos >= 0:
+            while pos >= 0 and pos < max_pos:
                 new_molecule = molecule[:pos] + \
                     replacement + molecule[pos + len(pattern):]
                 new_molecules.add(new_molecule)
