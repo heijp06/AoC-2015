@@ -1,5 +1,5 @@
 import pytest
-from lib import part1, part2
+from lib import part1, part2, reduce
 from group import Group
 
 
@@ -48,6 +48,7 @@ def test_reduce_h_si_rn_mg_ar():
     assert len(group.groups) == 1
     assert group.groups[0] == "H"
 
+
 def test_reduce_c_rn_f_y_f_ar():
     group = Group.parse_molecule("CRnFYFAr")
 
@@ -60,6 +61,7 @@ def test_reduce_c_rn_f_y_f_ar():
     assert group.reductions == 1
     assert len(group.groups) == 1
     assert group.groups[0] == "O"
+
 
 def test_reduce_c_rn_f_ar_th_rn_f_ar():
     group = Group.parse_molecule("CRnFArThRnFAr")
@@ -80,6 +82,10 @@ def test_reduce_c_rn_f_ar_th_rn_f_ar():
 def test_group_replace_all():
     assert Group._replace_all("BPTiMg", replacements) == {
         "TiTiMg", "BPMg"}
+
+
+def test_new_reduce_c_rn_f_ar_th_rn_f_ar():
+    assert reduce("CRnFArThRnFAr", replacements) == 3
 
 
 replacements = [
