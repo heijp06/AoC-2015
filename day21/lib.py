@@ -60,4 +60,24 @@ def iterate_items():
 
 
 def part2(rows):
-    pass
+    boss_damage = 8
+    boss_armor = 2
+    highest_cost = None
+    for items in iterate_items():
+        name = ""
+        cost = 0
+        my_damage = 0
+        my_armor = 0
+        for item in items:
+            name += " " + item[0]
+            cost += item[1]
+            my_damage += item[2]
+            my_armor += item[3]
+        name = name[1:]
+        boss_deals = max(1, boss_damage - my_armor)
+        i_deal = max(1, my_damage - boss_armor)
+        if ((100 + boss_deals - 1) // boss_deals < (100 + i_deal - 1) // i_deal
+                and (not highest_cost or cost > highest_cost)):
+            print(f"{name}, cost = {cost}, damage = {my_damage}, armor = {my_armor}")
+            highest_cost = cost
+    return highest_cost
