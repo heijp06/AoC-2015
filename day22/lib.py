@@ -25,7 +25,7 @@ def part1():
 def play(new_game: Game, min_mana: int, new_games: list[Game]) -> int:
     if new_game.boss_loses():
         return new_game.mana_spent if not min_mana or new_game.mana_spent < min_mana else min_mana
-    if not new_game.player_loses():
+    if not new_game.player_loses() and (not min_mana or new_game.mana_spent < min_mana):
         new_games.append(new_game)
     return min_mana
 
