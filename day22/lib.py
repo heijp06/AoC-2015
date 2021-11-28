@@ -2,7 +2,11 @@ from game import Game
 
 
 def part1():
-    games = {Game()}
+    return go(Game())
+
+
+def go(game: Game) -> int:
+    games = {game}
     min_mana = None
     while games:
         new_games = set()
@@ -29,5 +33,5 @@ def play(new_game: Game, min_mana: int, new_games: set[Game]) -> int:
     return min_mana
 
 
-def part2(rows):
-    pass
+def part2():
+    return go(Game(hard=True))

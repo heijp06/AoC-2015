@@ -9,7 +9,7 @@ EFFECT_RECHARGE = 3
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, hard=False):
         self.player_hitpoints: int = 50
         self.player_armor: int = 0
         self.boss_hitpoints: int = 55
@@ -17,11 +17,12 @@ class Game:
         self.effects: dict[int, int] = {}
         self.mana_spent: int = 0
         self.invalid_cast: bool = False
+        self.hard = hard
 
     def __repr__(self) -> str:
         return f"p_hp: {self.player_hitpoints}, b_hp: {self.boss_hitpoints}, mana: {self.mana}, spent: {self.mana_spent}"
 
-    def _key(self) -> tuple[int, int, int, int, int, bool, int]:
+    def _key(self) -> tuple[int, int, int, int, int, bool, bool, int]:
         effects = 0
         if EFFECT_SHIELD in self.effects:
             effects += self.effects[EFFECT_SHIELD]
@@ -36,6 +37,7 @@ class Game:
             self.mana,
             self.mana_spent,
             self.invalid_cast,
+            self.hard,
             effects
         )
 
@@ -54,7 +56,7 @@ class Game:
         return self.boss_hitpoints <= 0
 
     def boss_play(self) -> Game:
-        game = self._next_turn()
+        game = self._next_turn(player_turn=False)
         if game.boss_loses():
             return game
         damage = max(1, BOSS_DAMAGE - game.player_armor)
@@ -106,8 +108,12 @@ class Game:
         self.mana -= mana
         self.mana_spent += mana
 
-    def _next_turn(self) -> Game:
+    def _next_turn(self, player_turn: bool = True) -> Game:
         game = copy.deepcopy(self)
+        if player_turn and game.hard:
+            game.player_hitpoints -= 1
+            if game.player_loses():
+                return game
         game._handle_effects()
         return game
 
