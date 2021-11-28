@@ -65,7 +65,7 @@ class Game:
 
     def cast_magic_missile(self) -> Game:
         game = self._next_turn()
-        if game.boss_loses():
+        if game.player_loses() or game.boss_loses():
             return game
         game._spend(53)
         if game.player_loses():
@@ -75,7 +75,7 @@ class Game:
 
     def cast_drain(self) -> Game:
         game = self._next_turn()
-        if game.boss_loses():
+        if game.player_loses() or game.boss_loses():
             return game
         game._spend(73)
         if game.player_loses():
@@ -95,7 +95,7 @@ class Game:
 
     def _cast_effect(self, effect, mana, duration) -> Game:
         game = self._next_turn()
-        if game.boss_loses():
+        if game.player_loses() or game.boss_loses():
             return game
         game.invalid_cast = effect in game.effects
         game._spend(mana)
@@ -126,8 +126,9 @@ class Game:
         self._decrease_effects()
 
     def _decrease_effects(self) -> None:
-        for effect in (EFFECT_SHIELD, EFFECT_POISON, EFFECT_RECHARGE):
-            if effect in self.effects:
-                self.effects[effect] -= 1
-                if not self.effects[effect]:
-                    del self.effects[effect]
+        for effect, duration in list(self.effects.items()):
+            duration -= 1
+            if duration:
+                self.effects[effect] = duration
+            else:
+                del self.effects[effect]
