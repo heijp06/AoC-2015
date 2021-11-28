@@ -10,16 +10,42 @@ EFFECT_RECHARGE = 3
 
 class Game:
     def __init__(self):
-        self.player_hitpoints = 50
-        self.player_armor = 0
-        self.boss_hitpoints = 55
-        self.mana = 500
-        self.effects = {}
-        self.mana_spent = 0
-        self.invalid_cast = False
+        self.player_hitpoints: int = 50
+        self.player_armor: int = 0
+        self.boss_hitpoints: int = 55
+        self.mana: int = 500
+        self.effects: dict[int, int] = {}
+        self.mana_spent: int = 0
+        self.invalid_cast: bool = False
 
     def __repr__(self) -> str:
         return f"p_hp: {self.player_hitpoints}, b_hp: {self.boss_hitpoints}, mana: {self.mana}, spent: {self.mana_spent}"
+
+    def _key(self) -> tuple[int, int, int, int, int, bool, int]:
+        effects = 0
+        if EFFECT_SHIELD in self.effects:
+            effects += self.effects[EFFECT_SHIELD]
+        if EFFECT_POISON in self.effects:
+            effects += self.effects[EFFECT_POISON] * 10
+        if EFFECT_RECHARGE in self.effects:
+            effects += self.effects[EFFECT_RECHARGE] * 100
+        return (
+            self.player_hitpoints,
+            self.player_armor,
+            self.boss_hitpoints,
+            self.mana,
+            self.mana_spent,
+            self.invalid_cast,
+            effects
+        )
+
+    def __hash__(self) -> int:
+        return hash(self._key())
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Game):
+            return False
+        return self._key() == other._key()
 
     def player_loses(self) -> bool:
         return self.invalid_cast or self.mana < 0 or self.player_hitpoints <= 0
